@@ -3,6 +3,7 @@ from itertools import product
 from src.domain.models import Player, TeamComposition, Role
 from src.domain.exceptions import InvalidBudgetError, InvalidTeamCompositionError, OpponentConflictError
 from src.services.match_analysis import MatchAnalysisService
+from src.utils.calculators import is_easy_match
 
 class TeamCompositionService:
     def __init__(self, match_analysis_service: MatchAnalysisService):
@@ -115,24 +116,35 @@ class TeamCompositionService:
             # Skip if combination exceeds budget
             if total_cost > budget:
                 continue
+
+            players = [top, jungle, mid, bottom, support]
+            team_counts = {}
+            for p in players:
+                team_counts[p.team] = team_counts.get(p.team, 0) + 1
+            # Verifica se algum time tem mais de 3 jogadores
+            for team_id, count in team_counts.items():
+                if count > 3:
+                    # Só permite se TODOS os jogadores desse time tiverem confronto fácil
+                    if not all(is_easy_match(p) for p in players if p.team == team_id):
+                        break  # Não permite esta composição
+            else:
+                composition = TeamComposition(
+                    top=top,
+                    jungle=jungle,
+                    mid=mid,
+                    bottom=bottom,
+                    support=support,
+                    total_cost=total_cost,
+                    total_value=0.0,
+                    remaining_budget=budget - total_cost
+                )
                 
-            composition = TeamComposition(
-                top=top,
-                jungle=jungle,
-                mid=mid,
-                bottom=bottom,
-                support=support,
-                total_cost=total_cost,
-                total_value=0.0,
-                remaining_budget=budget - total_cost
-            )
-            
-            team_score = self.calculate_team_score(composition, opponent_dict)
-            
-            if team_score > best_score:
-                best_score = team_score
-                composition.total_value = team_score
-                best_composition = composition
+                team_score = self.calculate_team_score(composition, opponent_dict)
+                
+                if team_score > best_score:
+                    best_score = team_score
+                    composition.total_value = team_score
+                    best_composition = composition
         
         if best_composition is None:
             raise InvalidTeamCompositionError("Could not find a valid team composition")

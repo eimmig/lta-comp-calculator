@@ -33,3 +33,8 @@ def weighted_average(values: List[float], weights: List[float]) -> float:
     weight_sum = sum(weights)
     
     return total / weight_sum if weight_sum > 0 else 0.0
+
+def is_easy_match(player: Player) -> bool:
+    """Retorna True se o confronto do jogador for considerado fácil com base em opponent_strength."""
+    # Considera fácil se a força do adversário for 15% menor que a média
+    return hasattr(player, 'opponent_strength') and player.opponent_strength < 0.85
