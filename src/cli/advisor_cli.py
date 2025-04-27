@@ -103,8 +103,6 @@ class AdvisorCLI:
                 )
                 
                 role_table.sort(key=lambda x: x[args.key], reverse=args.reverse)
-                print(f"\n{role.value.upper()} PLAYERS:")
-                print(tabulate(role_table, headers=["Name", "Team", "Cost", "Details", "Stats", "Value"]))
             
             # Find best team composition if budget is provided
             if args.valorTotal is not None:

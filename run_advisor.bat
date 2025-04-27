@@ -18,8 +18,4 @@ if !ERRORLEVEL! neq 0 (
     exit /b 1
 )
 
-:: Limpa arquivos de cache se existirem
-if exist "__pycache__" (
-    rmdir /s /q "__pycache__" 2>nul
-)
 pause
